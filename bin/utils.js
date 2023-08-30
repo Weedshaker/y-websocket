@@ -19,9 +19,14 @@ const wsReadyStateOpen = 1
 const wsReadyStateClosing = 2 // eslint-disable-line
 const wsReadyStateClosed = 3 // eslint-disable-line
 
+// SST: added web-push for notifications
+const webpush = require('web-push')
+webpush.setVapidDetails('mailto: <weedshaker@gmail.com>', 'BITPxH2Sa4eoGRCqJtvmOnGFCZibh_ZaUFNmzI_f3q-t2FwA3HkgMqlOqN37L2vwm_RBlwmbcmVSOjPeZCW6YI4', 'crRVYz3u_HjT6Y1n8tTwSsDPMfPZJU3_AruHwevoxxk');
+const subscriptions = exports.subscriptions = new Map()
+
 // disable gc when using snapshots!
 const gcEnabled = process.env.GC !== 'false' && process.env.GC !== '0'
-const persistenceDir = process.env.YPERSISTENCE || '/tmp/_leveldb' // sst: fallback value
+const persistenceDir = process.env.YPERSISTENCE || '/tmp/_leveldb' // SST: fallback value
 /**
  * @type {{bindState: function(string,WSSharedDoc):void, writeState:function(string,WSSharedDoc):Promise<any>, provider: any}|null}
  */
@@ -42,7 +47,7 @@ if (typeof persistenceDir === 'string') {
         ldb.storeUpdate(docName, update)
       })
     },
-    clearDocument: async (docName) => ldb.clearDocument(docName), // sst: extended exposed props according https://github.com/yjs/y-leveldb/tree/master
+    clearDocument: async (docName) => ldb.clearDocument(docName), // SST: extended exposed props according https://github.com/yjs/y-leveldb/tree/master
     writeState: async (docName, ydoc) => {}
   }
 }
@@ -133,6 +138,10 @@ class WSSharedDoc extends Y.Doc {
         { maxWait: CALLBACK_DEBOUNCE_MAXWAIT }
       ))
     }
+    // SST: Notification
+    this.on('update', () => {
+      if (subscriptions.has(name)) subscriptions.get(name).forEach((subscription, room) => webpush.sendNotification(subscription, JSON.stringify({ title: `New entries in the room: ${room}`, body: 'You got an update!' })).catch(console.log))
+    })
   }
 }
 
@@ -201,7 +210,7 @@ const closeConn = (doc, conn) => {
     const controlledIds = doc.conns.get(conn)
     doc.conns.delete(conn)
     awarenessProtocol.removeAwarenessStates(doc.awareness, Array.from(controlledIds), null)
-    // sst: extended persistence and doc live behavior
+    // SST: extended persistence and doc live behavior
     if (doc.conns.size === 0) {
       if (keepAlive.has(doc.name) && keepAlive.get(doc.name).delay > 0) {
         if (persistence !== null) {
@@ -253,7 +262,7 @@ const send = (doc, conn, m) => {
 
 const pingTimeout = 30000
 
-const keepAlive = new Map() // sst: keep track on query parameter "keep-alive" and delete/destroy the doc after such timeout
+const keepAlive = new Map() // SST: keep track on query parameter "keep-alive" and delete/destroy the doc after such timeout
 
 /**
  * @param {any} conn
@@ -262,10 +271,10 @@ const keepAlive = new Map() // sst: keep track on query parameter "keep-alive" a
  */
 exports.setupWSConnection = (conn, req, { docName = req.url.slice(1).split('?')[0], gc = true } = {}) => {
   conn.binaryType = 'arraybuffer'
-  // sst: TODO: consider some mechanism to delete leveldb incase timeouts would get interrupted and would not execute their deletions
+  // SST: TODO: consider some mechanism to delete leveldb incase timeouts would get interrupted and would not execute their deletions
   // get doc, initialize if it does not exist yet
   const doc = getYDoc(docName, gc)
-  // sst: read keep-alive query parameter and delete the data after according timeouts
+  // SST: read keep-alive query parameter and delete the data after according timeouts
   if (keepAlive.has(doc.name)) clearTimeout(keepAlive.get(doc.name).timeout)
   keepAlive.set(doc.name, {
     // simulate url to read the query parameters
