@@ -43,6 +43,7 @@ const server = http.createServer((request, response) => {
       const room = body.room
       delete body.room
       if (request.url === '/subscribe') {
+        // TODO: Filter here, to avoid multiple same/similar subscriptions
         if (subscriptions.has(room)) {
           subscriptions.get(room).push(body)
         } else {
