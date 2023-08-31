@@ -142,7 +142,7 @@ class WSSharedDoc extends Y.Doc {
     // TODO: Figure out the impact of change vs. update also avoid sending notification on closing tab
     //this.on('change', () => {
     this.on('update', () => {
-      if (subscriptions.has(name)) subscriptions.get(name).forEach((subscription, room) => webpush.sendNotification(subscription, JSON.stringify({ title: `New entries in the room: ${room}`, body: 'You got an update!' })).catch(console.log))
+      if (subscriptions.has(name)) subscriptions.get(name).forEach(subscription => webpush.sendNotification(subscription, JSON.stringify({ title: `New entries in the room: ${name}`, body: 'You got an update!' })).catch(console.log))
     })
   }
 }
