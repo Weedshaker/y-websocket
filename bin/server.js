@@ -45,7 +45,7 @@ const server = http.createServer((request, response) => {
       if (request.url === '/subscribe') {
         // TODO: Filter here, to avoid multiple same/similar subscriptions
         if (subscriptions.has(room)) {
-          subscriptions.get(room).push(body)
+          if (subscriptions.get(room).indexOf(body) === -1) subscriptions.get(room).push(body)
         } else {
           subscriptions.set(room, [body])
         }
