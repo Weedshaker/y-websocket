@@ -21,6 +21,7 @@ const wsReadyStateClosed = 3 // eslint-disable-line
 
 // SST: added web-push for notifications
 const webpush = require('web-push')
+// https://vapidkeys.com/
 webpush.setVapidDetails('mailto: <weedshaker@gmail.com>', 'BITPxH2Sa4eoGRCqJtvmOnGFCZibh_ZaUFNmzI_f3q-t2FwA3HkgMqlOqN37L2vwm_RBlwmbcmVSOjPeZCW6YI4', 'crRVYz3u_HjT6Y1n8tTwSsDPMfPZJU3_AruHwevoxxk');
 const subscriptions = exports.subscriptions = new Map()
 
@@ -140,9 +141,17 @@ class WSSharedDoc extends Y.Doc {
     }
     // SST: Notification
     // TODO: Figure out the impact of change vs. update also avoid sending notification on closing tab
-    //this.on('change', () => {
     this.on('update', () => {
-      if (subscriptions.has(name)) subscriptions.get(name).forEach(subscription => webpush.sendNotification(subscription, JSON.stringify({ title: `New entries in the room: ${name}`, body: 'You got an update!' })).catch(console.log))
+      if (subscriptions.has(name)) subscriptions.get(name).forEach(subscription => webpush.sendNotification(subscription, JSON.stringify({
+        room: name,
+        type: 'update'
+      })).catch(console.log))
+    })
+    this.on('change', () => {
+      if (subscriptions.has(name)) subscriptions.get(name).forEach(subscription => webpush.sendNotification(subscription, JSON.stringify({
+        room: name,
+        type: 'change'
+      })).catch(console.log))
     })
   }
 }

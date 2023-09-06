@@ -42,16 +42,20 @@ const server = http.createServer((request, response) => {
       }
       const room = body.room
       delete body.room
+      const subscription = subscriptions.get(room)
+      const getIndex = () => Array.isArray(subscription)
+        ? subscription.findIndex(sub => JSON.stringify(sub.keys) === JSON.stringify(body.keys))
+        : -1
       if (request.url === '/subscribe') {
-        // TODO: Filter here, to avoid multiple same/similar subscriptions
-        if (subscriptions.has(room)) {
-          if (subscriptions.get(room).indexOf(body) === -1) subscriptions.get(room).push(body)
+        // subscribe
+        if (subscription) {
+          if (getIndex() === -1) subscription.push(body)
         } else {
           subscriptions.set(room, [body])
         }
-      } else if (subscriptions.has(room)) {
-        const subscription = subscriptions.get(room)
-        const index = subscription.findIndex(sub => JSON.stringify(sub.keys) === JSON.stringify(body.keys))
+      } else if (subscription) {
+        // unsubscribe
+        const index = getIndex()
         if (index !== -1) subscription.splice(index, 1)
       }
       response.writeHead(201, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' })
