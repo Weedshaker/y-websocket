@@ -142,10 +142,13 @@ class WSSharedDoc extends Y.Doc {
     // SST: Notification
     // TODO: Figure out the impact of change vs. update also avoid sending notification on closing tab
     this.on('update', () => {
-      if (subscriptions.has(name)) subscriptions.get(name).forEach(subscription => webpush.sendNotification(subscription, JSON.stringify({
+      if (subscriptions.has(name)) subscriptions.get(name).forEach((subscription, i, subscriptions) => webpush.sendNotification(subscription, JSON.stringify({
         room: name,
         type: 'update'
-      })).catch(console.log))
+      })).catch(error => {
+        console.log('webpush error', error)
+        subscriptions.splice(i, 1)
+      }))
     })
     /*
     TODO: further events see: https://docs.yjs.dev/api/y.doc#event-handler
