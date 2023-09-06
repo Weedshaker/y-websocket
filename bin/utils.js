@@ -147,12 +147,15 @@ class WSSharedDoc extends Y.Doc {
         type: 'update'
       })).catch(console.log))
     })
-    this.on('change', () => {
+    /*
+    TODO: further events see: https://docs.yjs.dev/api/y.doc#event-handler
+    this.on('afterTransaction', () => {
       if (subscriptions.has(name)) subscriptions.get(name).forEach(subscription => webpush.sendNotification(subscription, JSON.stringify({
         room: name,
-        type: 'change'
+        type: 'afterTransaction'
       })).catch(console.log))
     })
+    */
   }
 }
 
