@@ -140,25 +140,24 @@ class WSSharedDoc extends Y.Doc {
       ))
     }
     // SST: Notification
-    // TODO: Figure out the impact of change vs. update also avoid sending notification on closing tab
-    this.on('update', () => {
-      if (subscriptions.has(name)) subscriptions.get(name).forEach((subscription, i, subscriptions) => webpush.sendNotification(subscription, JSON.stringify({
-        room: name,
-        type: 'update'
-      })).catch(error => {
-        console.log('webpush error', error)
-        subscriptions.splice(i, 1)
-      }))
+    const timeoutIDs = new Map()
+    // https://docs.yjs.dev/api/y.doc#event-handler
+    this.on('update', (update, origin, doc) => {
+      let data
+      if (subscriptions.has(name) && 'sendNotifications' in (data = Y.decodeUpdate(update)?.structs?.[0]?.content?.arr?.[0] || {})) {
+        clearTimeout(timeoutIDs.get(name))
+        timeoutIDs.set(name, setTimeout(() => {
+          subscriptions.get(name).forEach((subscription, i, subscriptions) => webpush.sendNotification(subscription, JSON.stringify({
+            room: name,
+            type: 'update',
+            ...data
+          })).catch(error => {
+            console.log('webpush error', error)
+            subscriptions.splice(i, 1)
+          }))
+        }, 1000))
+      }
     })
-    /*
-    TODO: further events see: https://docs.yjs.dev/api/y.doc#event-handler
-    this.on('afterTransaction', () => {
-      if (subscriptions.has(name)) subscriptions.get(name).forEach(subscription => webpush.sendNotification(subscription, JSON.stringify({
-        room: name,
-        type: 'afterTransaction'
-      })).catch(console.log))
-    })
-    */
   }
 }
 
