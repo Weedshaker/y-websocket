@@ -292,9 +292,10 @@ exports.setupWSConnection = (conn, req, { docName = req.url.slice(1).split('?')[
   const doc = getYDoc(docName, gc)
   // SST: read keep-alive query parameter and delete the data after according timeouts
   if (keepAlive.has(doc.name)) clearTimeout(keepAlive.get(doc.name).timeout)
+  const delay = req.url.match(/keep-alive=([^\&]*)/)
   keepAlive.set(doc.name, {
     // simulate url to read the query parameters
-    delay: Number((new URL(`http:${req.url}`)).searchParams.get('keep-alive') || 0),
+    delay: Number(Array.isArray(delay) && delay[1] || 0),
     timeout: null
   })
   // /sst
