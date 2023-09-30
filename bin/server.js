@@ -9,10 +9,14 @@ const wss = new WebSocket.Server({ noServer: true })
 const setupWSConnection = require('./utils.js').setupWSConnection
 // SST: notifications
 const subscriptions = require('./utils.js').subscriptions
+const hostAndPort = require('./utils.js').hostAndPort
 
 const host = process.env.HOST || 'localhost'
 // SST: changed from fallback 1234 to 80
 const port = process.env.PORT || 80
+// SST: feed the origin back
+hostAndPort.host = host
+hostAndPort.port = port
 
 const server = http.createServer((request, response) => {
   // SST: Escape for Notification

@@ -24,6 +24,11 @@ const webpush = require('web-push')
 // https://vapidkeys.com/
 webpush.setVapidDetails('mailto: <weedshaker@gmail.com>', 'BITPxH2Sa4eoGRCqJtvmOnGFCZibh_ZaUFNmzI_f3q-t2FwA3HkgMqlOqN37L2vwm_RBlwmbcmVSOjPeZCW6YI4', 'crRVYz3u_HjT6Y1n8tTwSsDPMfPZJU3_AruHwevoxxk');
 const subscriptions = exports.subscriptions = new Map()
+const hostAndPort = exports.hostAndPort = {
+  host: '',
+  port: '',
+  protocol: ''
+}
 
 // disable gc when using snapshots!
 const gcEnabled = process.env.GC !== 'false' && process.env.GC !== '0'
@@ -150,6 +155,7 @@ class WSSharedDoc extends Y.Doc {
           subscriptions.get(name).forEach((subscription, i, subscriptions) => webpush.sendNotification(subscription, JSON.stringify({
             room: name,
             type: 'update',
+            hostAndPort: `${hostAndPort.protocol}${hostAndPort.host}:${hostAndPort.port}`,
             ...data
           })).catch(error => {
             console.log('webpush error', error)
@@ -290,6 +296,8 @@ exports.setupWSConnection = (conn, req, { docName = req.url.slice(1).split('?')[
   // SST: TODO: consider some mechanism to delete leveldb incase timeouts would get interrupted and would not execute their deletions
   // get doc, initialize if it does not exist yet
   const doc = getYDoc(docName, gc)
+  // SST: know if the request is secure
+  hostAndPort.protocol = req.secure ? 'wss://' : 'ws://'
   // SST: read keep-alive query parameter and delete the data after according timeouts
   if (keepAlive.has(doc.name)) clearTimeout(keepAlive.get(doc.name).timeout)
   const delay = req.url.match(/keep-alive=([^\&]*)/)
