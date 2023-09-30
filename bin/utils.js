@@ -298,6 +298,8 @@ exports.setupWSConnection = (conn, req, { docName = req.url.slice(1).split('?')[
   const doc = getYDoc(docName, gc)
   // SST: know if the request is secure
   hostAndPort.protocol = req.secure ? 'wss://' : 'ws://'
+  hostAndPort.host = req.headers.host.split(':')[0]
+  hostAndPort.port = req.headers.host.split(':')[1]
   // SST: read keep-alive query parameter and delete the data after according timeouts
   if (keepAlive.has(doc.name)) clearTimeout(keepAlive.get(doc.name).timeout)
   const delay = req.url.match(/keep-alive=([^\&]*)/)
