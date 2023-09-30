@@ -27,7 +27,7 @@ const subscriptions = exports.subscriptions = new Map()
 const hostAndPort = exports.hostAndPort = {
   host: '',
   port: '',
-  protocol: ''
+  protocol: 'ws://'
 }
 
 // disable gc when using snapshots!
@@ -155,7 +155,7 @@ class WSSharedDoc extends Y.Doc {
           subscriptions.get(name).forEach((subscription, i, subscriptions) => webpush.sendNotification(subscription, JSON.stringify({
             room: name,
             type: 'update',
-            hostAndPort: `${hostAndPort.protocol}${hostAndPort.host}:${hostAndPort.port}`,
+            hostAndPort: `${hostAndPort.protocol}${hostAndPort.host}${hostAndPort.port ? `:${hostAndPort.port}` : ''}`,
             ...data
           })).catch(error => {
             console.log('webpush error', error)
@@ -297,9 +297,8 @@ exports.setupWSConnection = (conn, req, { docName = req.url.slice(1).split('?')[
   // get doc, initialize if it does not exist yet
   const doc = getYDoc(docName, gc)
   // SST: know if the request is secure
-  hostAndPort.protocol = req.secure ? 'wss://' : 'ws://'
-  hostAndPort.host = req.headers.host.split(':')[0]
-  hostAndPort.port = req.headers.host.split(':')[1]
+  hostAndPort.protocol = req.headers.origin.includes('https:') ? 'wss://' : 'ws://';
+  [hostAndPort.host, hostAndPort.port] = req.headers.host.split(':')
   // SST: read keep-alive query parameter and delete the data after according timeouts
   if (keepAlive.has(doc.name)) clearTimeout(keepAlive.get(doc.name).timeout)
   const delay = req.url.match(/keep-alive=([^\&]*)/)
