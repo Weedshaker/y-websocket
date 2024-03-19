@@ -22,7 +22,7 @@ const wsReadyStateClosed = 3 // eslint-disable-line
 // SST: added web-push for notifications
 const webpush = require('web-push')
 // https://vapidkeys.com/
-webpush.setVapidDetails('mailto: <weedshaker@gmail.com>', 'BITPxH2Sa4eoGRCqJtvmOnGFCZibh_ZaUFNmzI_f3q-t2FwA3HkgMqlOqN37L2vwm_RBlwmbcmVSOjPeZCW6YI4', 'crRVYz3u_HjT6Y1n8tTwSsDPMfPZJU3_AruHwevoxxk');
+webpush.setVapidDetails(process.env.VAPIDDETAILS_ONE || 'mailto: <weedshaker@gmail.com>', process.env.VAPIDDETAILS_TWO || 'BITPxH2Sa4eoGRCqJtvmOnGFCZibh_ZaUFNmzI_f3q-t2FwA3HkgMqlOqN37L2vwm_RBlwmbcmVSOjPeZCW6YI4', process.env.VAPIDDETAILS_THREE || 'crRVYz3u_HjT6Y1n8tTwSsDPMfPZJU3_AruHwevoxxk')
 const subscriptions = exports.subscriptions = new Map()
 const hostAndPort = exports.hostAndPort = {
   host: '',
