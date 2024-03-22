@@ -149,6 +149,7 @@ class WSSharedDoc extends Y.Doc {
     // https://docs.yjs.dev/api/y.doc#event-handler
     this.on('update', (update, origin, doc) => {
       let data
+      // TODO: evaluate if decodeUpdate would be better within the timeout, since this is probably calc heavy
       if (subscriptions.has(name) && 'sendNotifications' in (data = Y.decodeUpdate(update)?.structs?.[0]?.content?.arr?.[0] || {})) {
         clearTimeout(timeoutIDs.get(name))
         timeoutIDs.set(name, setTimeout(() => {
