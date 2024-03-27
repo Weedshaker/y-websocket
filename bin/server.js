@@ -9,6 +9,7 @@ const wss = new WebSocket.Server({ noServer: true })
 const setupWSConnection = require('./utils.js').setupWSConnection
 // SST: notifications
 const subscriptions = require('./utils.js').subscriptions
+const notifications = require('./utils.js').notifications
 const hostAndPort = require('./utils.js').hostAndPort
 
 const host = process.env.HOST || 'localhost'
@@ -20,7 +21,7 @@ hostAndPort.port = port
 
 const server = http.createServer((request, response) => {
   // SST: Escape for Notification
-  if (request.url === '/subscribe' || request.url === '/unsubscribe') {
+  if (request.url === '/subscribe' || request.url === '/unsubscribe' || request.url === '/get-notifications') {
     if (request.method === 'OPTIONS') {
       response.writeHead(202, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' })
       response.end('go ahead')
@@ -39,28 +40,41 @@ const server = http.createServer((request, response) => {
       } catch (e) {
         body = null
       }
-      if (!body.room) {
-        response.writeHead(400, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' })
-        response.end('body payload requires the property room, userVisibleOnly and applicationServerKey as string!')
-        return
-      }
-      const room = body.room
-      delete body.room
-      const subscription = subscriptions.get(room)
-      const getIndex = () => Array.isArray(subscription)
-        ? subscription.findIndex(sub => JSON.stringify(sub.keys) === JSON.stringify(body.keys))
-        : -1
-      if (request.url === '/subscribe') {
-        // subscribe
-        if (subscription) {
-          if (getIndex() === -1) subscription.push(body)
-        } else {
-          subscriptions.set(room, [body])
+      if (request.url === '/get-notifications') {
+        if (!Array.isArray(body)) {
+          response.writeHead(201, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' })
+          response.end(JSON.stringify([]))
+          return
         }
-      } else if (subscription) {
-        // unsubscribe
-        const index = getIndex()
-        if (index !== -1) subscription.splice(index, 1)
+        response.writeHead(201, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' })
+        const result = {}
+        body.forEach(roomName => (result[roomName] = notifications[roomName] || []))
+        response.end(JSON.stringify(result))
+        return
+      } else {
+        if (!body.room) {
+          response.writeHead(400, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' })
+          response.end('body payload requires the property room, userVisibleOnly and applicationServerKey as string!')
+          return
+        }
+        const room = body.room
+        delete body.room
+        const subscription = subscriptions.get(room)
+        const getIndex = () => Array.isArray(subscription)
+          ? subscription.findIndex(sub => JSON.stringify(sub.keys) === JSON.stringify(body.keys))
+          : -1
+        if (request.url === '/subscribe') {
+          // subscribe
+          if (subscription) {
+            if (getIndex() === -1) subscription.push(body)
+          } else {
+            subscriptions.set(room, [body])
+          }
+        } else if (subscription) {
+          // unsubscribe
+          const index = getIndex()
+          if (index !== -1) subscription.splice(index, 1)
+        }
       }
       response.writeHead(201, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' })
       response.end(request.url + 'done')

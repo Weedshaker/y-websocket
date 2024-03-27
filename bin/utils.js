@@ -24,6 +24,7 @@ const webpush = require('web-push')
 // https://vapidkeys.com/
 webpush.setVapidDetails(process.env.VAPIDDETAILS_ONE || 'mailto: <weedshaker@gmail.com>', process.env.VAPIDDETAILS_TWO || 'BITPxH2Sa4eoGRCqJtvmOnGFCZibh_ZaUFNmzI_f3q-t2FwA3HkgMqlOqN37L2vwm_RBlwmbcmVSOjPeZCW6YI4', process.env.VAPIDDETAILS_THREE || 'crRVYz3u_HjT6Y1n8tTwSsDPMfPZJU3_AruHwevoxxk')
 const subscriptions = exports.subscriptions = new Map()
+const notifications = exports.notifications = {}
 const hostAndPort = exports.hostAndPort = {
   host: '',
   port: '',
@@ -150,10 +151,17 @@ class WSSharedDoc extends Y.Doc {
     this.on('update', (update, origin, doc) => {
       let data
       // TODO: evaluate if decodeUpdate would be better within the timeout, since this is probably calc heavy
-      if (subscriptions.has(name) && 'sendNotifications' in (data = Y.decodeUpdate(update)?.structs?.[0]?.content?.arr?.[0] || {})) {
+      if (subscriptions.has(name) && 'sendNotifications' in (data = structuredClone(Y.decodeUpdate(update)?.structs?.[0]?.content?.arr?.[0] || {}))) {
         clearTimeout(timeoutIDs.get(name))
         timeoutIDs.set(name, setTimeout(() => {
-          subscriptions.get(name).forEach((subscription, i, subscriptions) => webpush.sendNotification(subscription, JSON.stringify({
+          // limit text length
+          if (data?.text.length > 100) {
+            const textArr = [...data.text]
+            textArr.length = 100
+            data.text = textArr.join('') + '...'
+          }
+          let notification
+          subscriptions.get(name).forEach((subscription, i, subscriptions) => webpush.sendNotification(subscription, JSON.stringify(notification = {
             room: name,
             type: 'update',
             hostAndPort: `${hostAndPort.protocol}${hostAndPort.host}${hostAndPort.port ? `:${hostAndPort.port}` : ''}`,
@@ -162,6 +170,13 @@ class WSSharedDoc extends Y.Doc {
             console.log('webpush error', error)
             subscriptions.splice(i, 1)
           }))
+          // consider to not store data.text although once encryption is done, there are not much worries
+          if (Array.isArray(notifications[name])) {
+            notifications[name].unshift(notification)
+            if (notifications[name].length > 100) notifications[name].length = 100 // don't store more than 100 notifications
+          } else {
+            notifications[name] = [notification]
+          }
         }, 1000))
       }
     })
