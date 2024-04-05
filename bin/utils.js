@@ -20,8 +20,8 @@ const wsReadyStateClosing = 2 // eslint-disable-line
 const wsReadyStateClosed = 3 // eslint-disable-line
 
 // SST: added web-push for notifications
-const notificationsMax = 9
-const notificationsTextMax = 99
+const notificationsMax = 10
+const notificationsTextMax = 100
 const webpush = require('web-push')
 // https://vapidkeys.com/
 webpush.setVapidDetails(process.env.VAPIDDETAILS_ONE || 'mailto: <weedshaker@gmail.com>', process.env.VAPIDDETAILS_TWO || 'BITPxH2Sa4eoGRCqJtvmOnGFCZibh_ZaUFNmzI_f3q-t2FwA3HkgMqlOqN37L2vwm_RBlwmbcmVSOjPeZCW6YI4', process.env.VAPIDDETAILS_THREE || 'crRVYz3u_HjT6Y1n8tTwSsDPMfPZJU3_AruHwevoxxk')
