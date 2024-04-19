@@ -21,7 +21,7 @@ const wsReadyStateClosed = 3 // eslint-disable-line
 
 // SST: added web-push for notifications
 const notificationsMax = 10
-const notificationsTextMax = 100
+const notificationsTextMax = 10
 const webpush = require('web-push')
 // https://vapidkeys.com/
 webpush.setVapidDetails(process.env.VAPIDDETAILS_ONE || 'mailto: <weedshaker@gmail.com>', process.env.VAPIDDETAILS_TWO || 'BITPxH2Sa4eoGRCqJtvmOnGFCZibh_ZaUFNmzI_f3q-t2FwA3HkgMqlOqN37L2vwm_RBlwmbcmVSOjPeZCW6YI4', process.env.VAPIDDETAILS_THREE || 'crRVYz3u_HjT6Y1n8tTwSsDPMfPZJU3_AruHwevoxxk')
@@ -151,36 +151,36 @@ class WSSharedDoc extends Y.Doc {
     const timeoutIDs = new Map()
     // https://docs.yjs.dev/api/y.doc#event-handler
     this.on('update', (update, origin, doc) => {
-      let data
-      // TODO: evaluate if decodeUpdate would be better within the timeout, since this is probably calc heavy
-      if (subscriptions.has(name) && 'sendNotifications' in (data = structuredClone(Y.decodeUpdate(update)?.structs?.[0]?.content?.arr?.[0] || {}))) {
-        clearTimeout(timeoutIDs.get(name))
-        timeoutIDs.set(name, setTimeout(() => {
+      clearTimeout(timeoutIDs.get(name))
+      timeoutIDs.set(name, setTimeout(() => {
+        let data
+        if ((data = structuredClone(Y.decodeUpdate(update)?.structs?.[0]?.content?.arr?.[0] || {})) && data.sendNotifications === true) {
           // limit text length
           if (data?.text.length > notificationsTextMax) {
             const textArr = [...data.text]
             textArr.length = notificationsTextMax
             data.text = textArr.join('') + '...'
           }
-          let notification
-          subscriptions.get(name).forEach((subscription, i, subscriptions) => webpush.sendNotification(subscription, JSON.stringify(notification = {
+          const notification = {
             room: name,
             type: 'update',
             hostAndPort: `${hostAndPort.protocol}${hostAndPort.host}${hostAndPort.port ? `:${hostAndPort.port}` : ''}`,
             ...data
-          })).catch(error => {
+          }
+          if (subscriptions.has(name)) subscriptions.get(name).forEach((subscription, i, subscriptions) => webpush.sendNotification(subscription, JSON.stringify(notification)).catch(error => {
             console.log('webpush error', error)
             subscriptions.splice(i, 1)
           }))
-          // consider to not store data.text although once encryption is done, there are not much worries
           if (Array.isArray(notifications[name])) {
+            // only keep the last notification
+            if (notifications[name][0]) notifications[name][0] = {timestamp: notifications[name][0].timestamp}
             notifications[name].unshift(notification)
             if (notifications[name].length > notificationsMax) notifications[name].length = notificationsMax // don't store more than notificationsMax notifications
           } else {
             notifications[name] = [notification]
           }
-        }, 1000))
-      }
+        }
+      }, 1000))
     })
   }
 }
