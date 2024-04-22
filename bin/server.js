@@ -52,7 +52,7 @@ const server = http.createServer((request, response) => {
         response.end(JSON.stringify(result))
         return
       } else {
-        if (!body.room) {
+        if (!body || !body.room) {
           response.writeHead(400, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' })
           response.end('body payload requires the property room, userVisibleOnly and applicationServerKey as string!')
           return
