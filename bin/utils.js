@@ -156,7 +156,7 @@ class WSSharedDoc extends Y.Doc {
         let data
         if ((data = structuredClone(Y.decodeUpdate(update)?.structs?.[0]?.content?.arr?.[0] || {})) && data.sendNotifications === true) {
           // limit text length
-          if (data?.text.length > notificationsTextMax) {
+          if (data?.text?.length > notificationsTextMax) {
             const textArr = [...data.text]
             textArr.length = notificationsTextMax
             data.text = textArr.join('') + '...'
