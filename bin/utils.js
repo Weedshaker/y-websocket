@@ -19,6 +19,9 @@ const wsReadyStateOpen = 1
 const wsReadyStateClosing = 2 // eslint-disable-line
 const wsReadyStateClosed = 3 // eslint-disable-line
 
+// SST: changed
+const allowKeepAliveForever = process.env.ALLOW_KEEP_ALIVE_FOREVER || false
+
 // SST: added web-push for notifications
 const notificationsMax = 10
 const notificationsTextMax = 10
@@ -252,21 +255,25 @@ const closeConn = (doc, conn) => {
     awarenessProtocol.removeAwarenessStates(doc.awareness, Array.from(controlledIds), null)
     // SST: extended persistence and doc live behavior
     if (doc.conns.size === 0) {
-      if (keepAlive.has(doc.name) && keepAlive.get(doc.name).delay > 0) {
+      if (keepAlive.has(doc.name) && (keepAlive.get(doc.name).delay > 0 || (allowKeepAliveForever && isNaN(keepAlive.get(doc.name).delay)))) {
         if (persistence !== null) {
           // if persisted, we store state and destroy ydocument
           persistence.writeState(doc.name, doc).then(() => {
             doc.destroy()
-            keepAlive.get(doc.name).timeout = setTimeout(() => {
-              persistence.clearDocument(doc.name)
-            }, keepAlive.get(doc.name).delay)
+            keepAlive.get(doc.name).timeout = isNaN(keepAlive.get(doc.name).delay)
+             ? null
+             : setTimeout(() => {
+                persistence.clearDocument(doc.name)
+              }, keepAlive.get(doc.name).delay)
           })
           docs.delete(doc.name)
         } else {
-          keepAlive.get(doc.name).timeout = setTimeout(() => {
-            doc.destroy()
-            docs.delete(doc.name)
-          }, keepAlive.get(doc.name).delay)
+          keepAlive.get(doc.name).timeout = isNaN(keepAlive.get(doc.name).delay)
+            ? null
+            : setTimeout(() => {
+              doc.destroy()
+              docs.delete(doc.name)
+            }, keepAlive.get(doc.name).delay)
         }
       } else {
         if (persistence !== null) {
