@@ -15,31 +15,18 @@ const hostAndPort = require('./utils.js').hostAndPort
 const host = process.env.HOST || 'localhost'
 // SST: changed from fallback 1234 to 80
 const port = process.env.PORT || 80
-// SST: changed
-const providerFallbacks = JSON.parse(process.env.PROVIDER_FALLBACKS || `[
-  ["websocket", ["https://the-decentral-web.loca.lt", "https://decentralninja.loca.lt", "wss://the-decentral-web.herokuapp.com"]],
-  ["webrtc", ["https://the-decentral-web-rtc.loca.lt"]]
-]`)
-// SST: changed
-const customMessage = process.env.CUSTOM_MESSAGE || 'This is my local tunneled websocket provider.'
 // SST: feed the origin back
 hostAndPort.host = host
 hostAndPort.port = port
 
 const server = http.createServer((request, response) => {
-  // SST: Escape for Notification, etc.
-  if (request.method === 'OPTIONS') {
-    response.writeHead(202, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' })
-    response.end('go ahead')
-    return
-  } else if (request.url === '/get-info') {
-    response.writeHead(201, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' })
-    response.end(JSON.stringify({
-      providerFallbacks,
-      customMessage
-    }))
-    return
-  } else if (request.url === '/subscribe' || request.url === '/unsubscribe' || request.url === '/get-notifications') {
+  // SST: Escape for Notification
+  if (request.url === '/subscribe' || request.url === '/unsubscribe' || request.url === '/get-notifications') {
+    if (request.method === 'OPTIONS') {
+      response.writeHead(202, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' })
+      response.end('go ahead')
+      return
+    }
     let body = ''
     request.on('data', chunk => body += chunk)
     request.on('end', () => {
