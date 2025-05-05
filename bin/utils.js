@@ -152,12 +152,13 @@ class WSSharedDoc extends Y.Doc {
     }
     // SST: Notification
     const timeoutIDs = new Map()
-    // https://docs.yjs.dev/api/y.doc#event-handler
-    this.on('update', (update, origin, doc) => {
+    // this.on('update', ...) does not register the specific change on the chat array but also grabs user changes and misses chat changes. https://docs.yjs.dev/api/y.doc#event-handler
+    const chat =  this.getArray(`${name}-chat-test-1`)// this could be simply 'chat' but since it has been in use with the name 'chat-test-1', we can not change it without breaking all older chats. So keep it!
+    chat.observe(yjsEvent => {
       clearTimeout(timeoutIDs.get(name))
       timeoutIDs.set(name, setTimeout(() => {
         let data
-        if ((data = structuredClone(Y.decodeUpdate(update)?.structs?.[0]?.content?.arr?.[0] || {})) && data.sendNotifications === true) {
+        if ((data = structuredClone(Array.from(yjsEvent?.changes?.added || []).slice(-1)[0]?.content?.arr?.[0] || {})) && data.sendNotifications === true) {
           // limit text length
           if (data?.text?.length > notificationsTextMax) {
             const textArr = [...data.text]
