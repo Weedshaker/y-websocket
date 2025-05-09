@@ -7,4 +7,4 @@ USER node
 RUN npm install
 COPY --chown=node:node . .
 EXPOSE 1234
-CMD [ "npm", "start-default" ]
+CMD [ "npm", "run", "start-default" ]
