@@ -1,3 +1,5 @@
+# docker
+docker run -p 1234:1234 weedshaker/y-websocket:latest
 
 # y-websocket :tophat:
 > WebSocket Provider for Yjs
