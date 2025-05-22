@@ -1,6 +1,22 @@
 # docker
 docker run -p 1234:1234 weedshaker/y-websocket:latest
 
+# local tunnel
+npm install -g localtunnel
+
+```
+#!/bin/bash
+# --print-requests
+attempts=0
+until lt --port 1234 --subdomain your-subdomain
+do
+attempts=$((attempts+1))
+echo "Attempt $attempts failed. Try again."
+done
+
+echo "Success after $attempts attempts."
+```
+
 # y-websocket :tophat:
 > WebSocket Provider for Yjs
 
