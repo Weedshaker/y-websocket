@@ -42,6 +42,10 @@ This repository implements a basic server that you can adopt to your specific us
 Start a y-websocket server:
 
 ```sh
+PORT=1234 node ./bin/server.js
+```
+
+```sh
 HOST=localhost PORT=1234 npx y-websocket
 ```
 
