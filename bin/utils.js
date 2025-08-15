@@ -330,7 +330,7 @@ exports.setupWSConnection = (conn, req, { docName = req.url.slice(1).split('?')[
   const delay = req.url.match(/keep-alive=([^\&]*)/)
   keepAlive.set(doc.name, {
     // simulate url to read the query parameters
-    delay: Number(Array.isArray(delay) && delay[1] || 0),
+    delay: Number(Array.isArray(delay) && delay[1] || 86400000),
     timeout: null
   })
   // /sst
