@@ -7,6 +7,8 @@ const WebSocket = require('ws')
 const http = require('http')
 const wss = new WebSocket.Server({ noServer: true })
 const setupWSConnection = require('./utils.js').setupWSConnection
+// SST: performance measure
+const os 	= require('os');
 // SST: notifications
 const subscriptions = require('./utils.js').subscriptions
 const notifications = require('./utils.js').notifications
@@ -21,7 +23,7 @@ const providerFallbacks = JSON.parse(process.env.PROVIDER_FALLBACKS || `[
   ["webrtc", ["https://the-decentral-web-rtc.loca.lt"]]
 ]`)
 // SST: changed
-const customMessage = process.env.CUSTOM_MESSAGE || 'This is my local tunneled websocket provider.'
+const customMessage = process.env.CUSTOM_MESSAGE || 'This is my websocket provider.'
 // SST: feed the origin back
 hostAndPort.host = host
 hostAndPort.port = port
@@ -35,6 +37,13 @@ const server = http.createServer((request, response) => {
   } else if (request.url === '/get-info') {
     response.writeHead(201, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' })
     response.end(JSON.stringify({
+      os: {
+        cpus: os.cpus(),
+        freemem: os.freemem(),
+        totalmem: os.totalmem(),
+        loadavg: os.loadavg(),
+        uptime: os.uptime()
+      },
       providerFallbacks,
       customMessage
     }))
