@@ -157,6 +157,7 @@ class WSSharedDoc extends Y.Doc {
     chat.observe(yjsEvent => {
       clearTimeout(timeoutIDs.get(name))
       timeoutIDs.set(name, setTimeout(() => {
+        // TODO: Handle removed messages
         let data
         if ((data = structuredClone(Array.from(yjsEvent?.changes?.added || []).slice(-1)[0]?.content?.arr?.[0] || {})) && data.sendNotifications === true) {
           // limit text length
