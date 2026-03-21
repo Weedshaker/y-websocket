@@ -19,9 +19,9 @@ const host = process.env.HOST || 'localhost'
 const port = process.env.PORT || 80
 // SST: changed
 const providerFallbacks = JSON.parse(process.env.PROVIDER_FALLBACKS || `[
-  ["websocket", ["https://the-decentral-web.loca.lt", "https://decentralninja.loca.lt", "wss://the-decentral-web.herokuapp.com"]],
-  ["webrtc", ["https://the-decentral-web-rtc.loca.lt"]]
-]`)
+  ["websocket", ["wss://the-decentral-web.herokuapp.com", "wss://websocket.peerweb.site", "wss://websocket-two.peerweb.site"]],
+  ["webrtc", ["wss://webrtc.peerweb.site", "wss://webrtc-two.peerweb.site"]]
+]`) // pangolin providers + utils vapid key pass by process.env.-variable-
 // SST: changed
 const customMessage = process.env.CUSTOM_MESSAGE || 'This is my websocket provider.'
 // SST: feed the origin back
