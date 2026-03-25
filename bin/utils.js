@@ -266,6 +266,7 @@ const closeConn = (doc, conn) => {
              ? null
              : setTimeout(() => {
                 persistence.clearDocument(doc.name)
+                delete notifications[doc.name]
               }, keepAlive.get(doc.name).delay)
           })
           docs.delete(doc.name)
@@ -275,16 +276,19 @@ const closeConn = (doc, conn) => {
             : setTimeout(() => {
               doc.destroy()
               docs.delete(doc.name)
+              delete notifications[doc.name]
             }, keepAlive.get(doc.name).delay)
         }
       } else {
         if (persistence !== null) {
           doc.destroy()
           docs.delete(doc.name)
+          delete notifications[doc.name]
           persistence.clearDocument(doc.name)
         } else {
           doc.destroy()
           docs.delete(doc.name)
+          delete notifications[doc.name]
         }
       }
     }
