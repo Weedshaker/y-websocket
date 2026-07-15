@@ -18,9 +18,10 @@ const host = process.env.HOST || 'localhost'
 // SST: changed from fallback 1234 to 80
 const port = process.env.PORT || 80
 // SST: changed
+// removed: wss://webrtc.peerweb.site
 const providerFallbacks = JSON.parse(process.env.PROVIDER_FALLBACKS || `[
   ["websocket", ["wss://heroku.peerweb.site", "wss://websocket.peerweb.site", "wss://websocket-two.peerweb.site"]],
-  ["webrtc", ["wss://webrtc.peerweb.site", "wss://webrtc-two.peerweb.site"]]
+  ["webrtc", ["wss://webrtc-two.peerweb.site"]]
 ]`) // pangolin providers + utils vapid key pass by process.env.-variable-
 // SST: changed
 const customMessage = process.env.CUSTOM_MESSAGE || 'This is my websocket provider.'
