@@ -172,10 +172,24 @@ class WSSharedDoc extends Y.Doc {
             hostAndPort: `${hostAndPort.protocol}${hostAndPort.host}${hostAndPort.port ? `:${hostAndPort.port}` : ''}`,
             ...data
           }
-          if (subscriptions.has(name)) subscriptions.get(name).forEach((subscription, i, subscriptions) => webpush.sendNotification(subscription, JSON.stringify(notification)).catch(error => {
-            console.log('webpush error', error)
-            subscriptions.splice(i, 1)
-          }))
+          if (subscriptions.has(name)) {
+            const list = subscriptions.get(name)
+            if (!list.length) return
+            Promise.allSettled(list.map(subscription => webpush.sendNotification(subscription, JSON.stringify(notification)))).then(results => {
+              const dead = new Set()
+              results.forEach((result, i) => {
+                if (result.status === 'rejected') {
+                  const statusCode = result.reason?.statusCode
+                  if (statusCode === 404 || statusCode === 410) {
+                    dead.add(list[i])
+                  } else {
+                    console.warn('webpush error (not pruning)', name, statusCode, result.reason?.body || result.reason?.message)
+                  }
+                }
+              })
+              if (dead.size) subscriptions.set(name, subscriptions.get(name).filter(sub => !dead.has(sub)))
+            })
+          }
           if (Array.isArray(notifications[name])) {
             // only keep the last notification
             if (notifications[name][0]) notifications[name][0] = {timestamp: notifications[name][0].timestamp}
