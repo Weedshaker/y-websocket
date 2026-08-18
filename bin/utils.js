@@ -27,7 +27,7 @@ const notificationsMax = 10
 const notificationsTextMax = 10
 const webpush = require('web-push')
 // https://vapidkeys.com/
-webpush.setVapidDetails(process.env.VAPIDDETAILS_ONE || 'mailto: <tzxxgteunufapiduid@enotj.com>', process.env.VAPIDDETAILS_TWO || 'BHIMJ_jr9km6VYKudv5yZ4CXlWpHSZApTtCR6GmLdvsax31E-tpm4VOJeAD6SAe76oqkDaMZ_h4g1EhIoAKvXYc', process.env.VAPIDDETAILS_THREE || '567jBc_84k4QfOXY09_GSYe_ZtFGn2X_qsJ6dHBYy8s')
+webpush.setVapidDetails(process.env.VAPIDDETAILS_ONE || 'mailto: <weedshaker@starsystems.ch>', process.env.VAPIDDETAILS_TWO || 'BDky-QCE7l597P075T4kcg9ctjpR2h2RLmP8gnKWSkWlB_iJCIwK9Pny6W2GEkaFSq--ugcorrDVO_Bf9HuAQes', process.env.VAPIDDETAILS_THREE || 'sx2skDDFGHBHjuSnpbRSRnzG4Oary6bADJhvhLm_N8I')
 const subscriptions = exports.subscriptions = new Map()
 const notifications = exports.notifications = {}
 const hostAndPort = exports.hostAndPort = {

@@ -2,7 +2,7 @@
 docker run -p 1234:1234 weedshaker/y-websocket:latest
 
 # command
-PORT=1234 ALLOW_KEEP_ALIVE_FOREVER=true VAPIDDETAILS_ONE="mailto: <tzxxgteunufapiduid@enotj.com>" VAPIDDETAILS_TWO=BHIMJ_jr9km6VYKudv5yZ4CXlWpHSZApTtCR6GmLdvsax31E-tpm4VOJeAD6SAe76oqkDaMZ_h4g1EhIoAKvXYc VAPIDDETAILS_THREE=567jBc_84k4QfOXY09_GSYe_ZtFGn2X_qsJ6dHBYy8s node ./src/es/event-driven-web-components-yjs/servers/y-websocket/bin/server.js
+PORT=1234 ALLOW_KEEP_ALIVE_FOREVER=true VAPIDDETAILS_ONE="mailto: <weedshaker@starsystems.ch>" VAPIDDETAILS_TWO=BDky-QCE7l597P075T4kcg9ctjpR2h2RLmP8gnKWSkWlB_iJCIwK9Pny6W2GEkaFSq--ugcorrDVO_Bf9HuAQes VAPIDDETAILS_THREE=sx2skDDFGHBHjuSnpbRSRnzG4Oary6bADJhvhLm_N8I node ./src/es/event-driven-web-components-yjs/servers/y-websocket/bin/server.js
 
 # y-websocket :tophat:
 > WebSocket Provider for Yjs
