@@ -20,7 +20,7 @@ const port = process.env.PORT || 80
 // SST: changed
 // removed: wss://webrtc.peerweb.site
 const providerFallbacks = JSON.parse(process.env.PROVIDER_FALLBACKS || `[
-  ["websocket", ["wss://heroku.peerweb.site", "wss://websocket.peerweb.site", "wss://websocket-two.peerweb.site"]],
+  ["websocket", ["wss://heroku.decentral.ninja", "wss://websocket.peerweb.site", "wss://websocket-two.peerweb.site"]],
   ["webrtc", ["wss://webrtc-two.peerweb.site"]]
 ]`) // pangolin providers + utils vapid key pass by process.env.-variable-
 // SST: changed
