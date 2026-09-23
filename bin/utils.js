@@ -382,6 +382,14 @@ exports.setupWSConnection = (conn, req, { docName = req.url.slice(1).split('?')[
   conn.on('pong', () => {
     pongReceived = true
   })
+  // SST: changed
+  // without this, any per-connection error (e.g. oversized frame) is an
+  // unhandled 'error' event and crashes the entire process, not just this conn
+  conn.on('error', (err) => {
+    console.error('ws connection error', doc.name, err)
+    closeConn(doc, conn)
+    clearInterval(pingInterval)
+  })
   // put the following in a variables in a block so the interval handlers don't keep in in
   // scope
   {

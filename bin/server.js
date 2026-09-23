@@ -109,6 +109,8 @@ const server = http.createServer((request, response) => {
 })
 
 wss.on('connection', setupWSConnection)
+// SST: changed
+wss.on('error', err => console.error('wss error', err))
 
 server.on('upgrade', (request, socket, head) => {
   // You may check auth of request here..
