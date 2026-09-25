@@ -14,6 +14,10 @@ const subscriptions = require('./utils.js').subscriptions
 const notifications = require('./utils.js').notifications
 const hostAndPort = require('./utils.js').hostAndPort
 
+// SST: process-wide safety net — log instead of dying
+process.on('uncaughtException', err => console.error('uncaughtException', err))
+process.on('unhandledRejection', err => console.error('unhandledRejection', err))
+
 const host = process.env.HOST || 'localhost'
 // SST: changed from fallback 1234 to 80
 const port = process.env.PORT || 80
